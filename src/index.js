@@ -6,7 +6,7 @@
 
   function getAPIKey () {
     const API_KEY_TOKEN = 'api_key'
-    const me = document.currentScript
+    const me = document.currentScript || { src: '/kerker?api_key=test_api' }
     const urlParser = document.createElement('a')
     urlParser.href = me.src
     const apiKey = getValFromQuery(API_KEY_TOKEN, urlParser.search)
@@ -97,10 +97,12 @@
 
   async function sendInteraction (type, payload, ctx) {
     payload = {
-      ...payload,
-      type,
-      user_id: ctx.customerId,
-      anonymous_id: ctx.anonymousId
+      data: [{
+        ...payload,
+        type,
+        user_id: ctx.customerId,
+        anonymous_id: ctx.anonymousId
+      }]
     }
     const url = `${API_ENDPOINT}interactions?api_key=${window.encodeURIComponent(API_KEY)}`
     const body = JSON.stringify(payload)
@@ -123,17 +125,17 @@
   }
 
   async function getProductDetail (productSlug) {
-    const productEndpoint = `//${window.location.host}/products/${productSlug}`
+    const productEndpoint = `//${window.location.host}/products/${productSlug}.js`
     const productResp = await window.fetch(productEndpoint)
     let productDetail = {}
     if (productResp.status === 200) {
-      productDetail = productResp.json()
+      productDetail = await productResp.json()
     }
     return {
-      productId: productDetail.id,
+      productId: `${productDetail.id}`,
       variants: productDetail.variants.map(variant => {
         return {
-          id: variant.id,
+          id: `${variant.id}`,
           title: variant.title
         }
       })
@@ -151,7 +153,7 @@
       variantId = productDetail.variants[0].id
     }
     const payload = {
-      product_group_ids: [ctx.resourceId]
+      product_group_ids: [productDetail.productId]
     }
     if (variantId) {
       payload.product_ids = [variantId]
