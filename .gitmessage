@@ -1,0 +1,14 @@
+Imperative mood
+
+Body: How & why instead of what
+
+MISO-XXX
+
+# 50-character subject line
+#
+# 72-character wrapped longer description.
+# 
+# Detail msg spec:
+# https://www.notion.so/askmiso/Jira-Gitlab-Dev-Guide-b7fc07df24634f5c99612db23c89dd74
+#
+# Enable this template by `git config commit.template .gitmessage`

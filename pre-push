@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Ensure commit log contain MISO-*
+# Ensure this push pass linter and unit test
+
+remote="$1"
+url="$2"
+
+z40=0000000000000000000000000000000000000000
+
+# Check commit msg
+while read local_ref local_sha remote_ref remote_sha
+do
+  if [ "$remote_ref" != "production" ] && [ "$local_sha" = $z40 ]
+  then
+    range="$local_sha^1..$local_sha"
+		# Check for WIP commit
+		commit=`git log --invert-grep --grep 'MISO-' "$range"`
+		if [ -n "$commit" ]
+		then
+			echo >&2 "Commit $local_sha missing Jira ticket ID, not pushing"
+			exit 1
+		fi
+	fi
+done
+
+# Run linter and unit test
+if npm run lint --quiet 2>/dev/null
+then
+  :
+else
+  echo >&2 "Linter failed. Please revise coding style!"
+  exit 1
+fi
+
+# if npm run test -- --coverage=0 --silent;
+# then
+#   :
+# else
+#   echo >&2 "Unit test failed. Please fix it!"
+#   exit 1
+# fi
+exit 0
+
