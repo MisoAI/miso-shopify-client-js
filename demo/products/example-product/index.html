@@ -5,22 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
-    <title>Test index document</title>
+    <title>Test document</title>
 </head>
 <body>
     <div class="mw8 center pv4">
-        <h1>Sample test page for shopify integration</h1>
-        <ul>
-            <li class="mb4">
-                <a href="/demo/products/example-product/" class="fw5 db">Product Detail Page</a>
-            </li>
-            <li class="mb4">
-                <a href="/demo/collections/example-collection/" class="fw5 db">Collection Page</a>
-            </li>
-        </ul>
+        <h1>Product | Sample test page for shopify integration</h1>
     </div>
     <script>
         ShopifyAnalytics = {
+            meta: {
+                page: {
+                    pageType: 'product',
+                    resourceId: 'my-resource-id',
+                    customerId: 'my-customer-id'
+                }
+            }
         }
     </script>
     <script src="/index.js?api_key=test_api"></script>
