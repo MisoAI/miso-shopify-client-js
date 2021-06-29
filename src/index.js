@@ -1,22 +1,9 @@
 import logger from './logger'
 import Tracker from './interactionTracker'
-import { getValFromQuery, genUuid } from './utils'
+import { genUuid, getConfigFromScript } from './utils'
 
 (function (window, document) {
   const ANONYMOUS_SESSION_KEY = 'misoAnonymousKey'
-  const API_KEY_TOKEN = 'api_key'
-
-  function getAPIKey () {
-    const me = document.currentScript
-    const urlParser = document.createElement('a')
-    urlParser.href = me.src
-    const apiKey = getValFromQuery(API_KEY_TOKEN, urlParser.search)
-    if (!apiKey) {
-      logger.error('API Key not found')
-      return
-    }
-    return apiKey
-  }
 
   function getUserId () {
     const ret = {}
@@ -56,14 +43,25 @@ import { getValFromQuery, genUuid } from './utils'
       logger.error('Cannot find page type')
       return
     }
-    const apiKey = getAPIKey()
+
+    const apiKey = getConfigFromScript('api_key')
+    const isDryRun = process.env.NODE_ENV === 'development' || !apiKey
+
+    logger.setCtx('isDryRun', isDryRun)
+    logger.setCtx('domain', window.location.host)
+    if (apiKey) {
+      logger.setCtx('apiKey', apiKey)
+    } else {
+      logger.error('API Key not found')
+    }
+
     return {
       pageType,
       resourceId,
       customerId,
       anonymousId,
       apiKey,
-      isDryRun: true
+      isDryRun
     }
   }
 

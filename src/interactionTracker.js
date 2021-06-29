@@ -19,7 +19,8 @@ export default class InteractionTracker {
 
     this.pageHandler = {
       product: this.handleDetailPage,
-      article: this.handleArticlePage
+      article: this.handleArticlePage,
+      collection: this.handleCollectionPage
     }
   }
 
@@ -101,6 +102,13 @@ export default class InteractionTracker {
   handleArticlePage () {
     this.sendInteraction('product_detail_page_view', {
       product_ids: [`${this.ctx.resourceId}`]
+    })
+  }
+
+  handleCollectionPage () {
+    const collectionSlug = getSlugFromPath('collections')
+    this.sendInteraction('category_page_view', {
+      category: [collectionSlug]
     })
   }
 }

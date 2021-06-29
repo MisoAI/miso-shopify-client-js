@@ -4,7 +4,7 @@ module.exports = {
   mode: 'production',
   entry: './src/index.js',
   devServer: {
-    static: path.resolve(__dirname),
+    static: path.resolve(__dirname, 'demo'),
     port: process.env.PORT || 3000,
     host: process.env.HOST || 'localhost',
     hot: true
