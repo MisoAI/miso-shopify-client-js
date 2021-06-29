@@ -1,11 +1,12 @@
 {
-  "name": "shopify-js-sdk",
+  "name": "miso-shopify-js-sdk",
   "version": "0.0.1",
   "description": "Miso JS SDK for Shopify integration",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ext .js --ignore-path .gitignore ."
+    "dev": "webpack serve --mode=development",
+    "lint": "eslint --ext .js --ignore-path .gitignore .",
+    "build": "webpack"
   },
   "author": "ddio <ddio@askmiso.com>",
   "license": "MIT",
@@ -15,6 +16,9 @@
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "jest": "^27.0.5"
+    "jest": "^27.0.5",
+    "webpack": "^5.40.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^4.0.0-beta.0"
   }
 }
