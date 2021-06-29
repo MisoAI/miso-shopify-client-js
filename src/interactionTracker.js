@@ -18,7 +18,8 @@ export default class InteractionTracker {
     this.endpoint = `${API_ENDPOINT}interactions?api_key=${window.encodeURIComponent(apiKey)}`
 
     this.pageHandler = {
-      product: this.handleDetailPage
+      product: this.handleDetailPage,
+      article: this.handleArticlePage
     }
   }
 
@@ -95,5 +96,11 @@ export default class InteractionTracker {
       payload.product_ids = [variantId]
     }
     this.sendInteraction('product_detail_page_view', payload)
+  }
+
+  handleArticlePage () {
+    this.sendInteraction('product_detail_page_view', {
+      product_ids: [`${this.ctx.resourceId}`]
+    })
   }
 }

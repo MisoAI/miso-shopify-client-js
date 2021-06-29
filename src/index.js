@@ -26,14 +26,14 @@ import { getValFromQuery, genUuid } from './utils'
         window.meta.page.customerId ||
         window._st.cid
       if (curr) {
-        ret.customerId = curr
+        ret.customerId = `${curr}`
       }
     } catch (e) { }
 
     try {
       const curr = window.ShopifyAnalytics.lib.user().traits().uniqToken
       if (curr) {
-        ret.anonymousId = curr
+        ret.anonymousId = `${curr}`
       }
     } catch (e) { }
 
