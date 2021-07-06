@@ -52,9 +52,9 @@ export async function hook (window, tracker) {
 
     if (itemAdded.length) {
       await tracker.sendInteraction('add_to_cart', {
-        quantity: itemAdded.map(i => i.quantity),
-        product_ids: itemAdded.map(i => i.id),
-        product_group_ids: itemAdded.map(i => i.productId),
+        quantities: itemAdded.map(i => i.quantity),
+        product_ids: itemAdded.map(i => `${i.id}`),
+        product_group_ids: itemAdded.map(i => `${i.productId}`),
         context
       })
     }
@@ -67,8 +67,8 @@ export async function hook (window, tracker) {
     })
     if (missingItems.length) {
       await tracker.sendInteraction('remove_from_cart', {
-        product_ids: missingItems.map(i => i.id),
-        product_group_ids: missingItems.map(i => i.productId),
+        product_ids: missingItems.map(i => `${i.id}`),
+        product_group_ids: missingItems.map(i => `${i.productId}`),
         context
       })
     }
@@ -107,9 +107,9 @@ export async function hook (window, tracker) {
     const cartToken = cartInfo.token
 
     await tracker.sendInteraction('add_to_cart', {
-      quantity: [quantityAdded],
-      product_ids: [variantId],
-      product_group_ids: [productId],
+      quantities: [quantityAdded],
+      product_ids: [`${variantId}`],
+      product_group_ids: [`${productId}`],
       context: {
         custom_context: {
           cart_token: cartToken
