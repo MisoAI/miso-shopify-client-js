@@ -5,7 +5,7 @@ const listenerCtx = []
 
 XMLHttpRequest.prototype.open = function (...args) {
   listenerCtx.forEach((ctx) => {
-    if (ctx.urlMatcher(args)) {
+    if (matchTargetEndpoint(args, ctx.urlEndpoint)) {
       const thisCallback = () => {
         ctx.callback.call(this)
         this.removeEventListener('load', thisCallback)
@@ -16,9 +16,24 @@ XMLHttpRequest.prototype.open = function (...args) {
   return origOpen.apply(this, args)
 }
 
-export function hookXHR (urlMatcher, callback) {
+function matchTargetEndpoint (openArgs, targetEndpoint, targetMethod = 'POST') {
+  const host = window.location.host
+  const optionalPostfix = ['.js', '.json']
+  if (openArgs.length < 2 || openArgs[0] !== targetMethod) {
+    return false
+  }
+  let url = openArgs[1]
+  optionalPostfix.forEach((postfix) => {
+    if (url.endsWith(postfix)) {
+      url = url.slice(0, postfix.length * -1)
+    }
+  })
+  return url === targetEndpoint || (url.startsWith(host) && url.endsWith(targetEndpoint))
+}
+
+export function hookXHR (urlEndpoint, callback) {
   const id = genUuid()
-  listenerCtx.push({ urlMatcher, callback, id })
+  listenerCtx.push({ urlEndpoint, callback, id })
 }
 
 export function unhookXHR (id) {

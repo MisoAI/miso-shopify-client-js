@@ -1,4 +1,4 @@
-import { hook as hookAddToCard } from './events/AddToCart'
+import { hook as hookCartChange } from './events/cartChange'
 
 import logger from './logger'
 import { getValFromQuery, getSlugFromPath } from './utils'
@@ -37,7 +37,7 @@ export default class InteractionTracker {
 
   unregister () {
     console.warn('unhook my old body')
-    hookAddToCard.unhook()
+    hookCartChange.unhook()
   }
 
   async sendInteraction (type, payload) {
@@ -89,7 +89,7 @@ export default class InteractionTracker {
 
   async handleDetailPage () {
     // register add to cart
-    hookAddToCard(window, this)
+    hookCartChange(window, this)
     // send product detail page view
     let variantId = getValFromQuery('variant')
     let productDetail = { variants: [] }
