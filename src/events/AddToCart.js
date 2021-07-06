@@ -1,32 +1,25 @@
 import logger from '../logger'
-const origOpen = XMLHttpRequest.prototype.open
+import { hookXHR, unhookXHR } from './xhrListener'
+
+let xhrHookId = null
 
 export async function hook (window, tracker) {
   let cartInfo = await getCartInfo()
 
-  XMLHttpRequest.prototype.open = function (...args) {
-    if (matchTargetEndpoint(args)) {
-      // only listen to target request
-      const handleCartAdd = async () => {
-        let resp = null
-        try {
-          resp = JSON.parse(this.responseText)
-        } catch (err) {
-          logger.error(`Failed during listen to add_to_cart: ${err}`)
-        }
-        if (!resp) {
-          return
-        }
-        const variantId = resp.variant_id
-        const quantity = resp.quantity
-        const productId = resp.product_id
-        await genEvent(variantId, productId, quantity)
-
-        this.removeEventListener('load', handleCartAdd)
-      }
-      this.addEventListener('load', handleCartAdd)
+  const handleCartAdd = async function () {
+    let resp = null
+    try {
+      resp = JSON.parse(this.responseText)
+    } catch (err) {
+      logger.error(`Failed during listen to add_to_cart: ${err}`)
     }
-    origOpen.apply(this, args)
+    if (!resp) {
+      return
+    }
+    const variantId = resp.variant_id
+    const quantity = resp.quantity
+    const productId = resp.product_id
+    await genEvent(variantId, productId, quantity)
   }
 
   async function genEvent (variantId, productId, quantity) {
@@ -72,8 +65,12 @@ export async function hook (window, tracker) {
     const url = openArgs[1]
     return url === TARGET_ENDPOINT || (url.startsWith(HOST) && url.endsWith(TARGET_ENDPOINT))
   }
+
+  xhrHookId = hookXHR(matchTargetEndpoint, handleCartAdd)
 }
 
 hook.unhook = function () {
-  XMLHttpRequest.open = origOpen
+  if (xhrHookId) {
+    unhookXHR(xhrHookId)
+  }
 }
