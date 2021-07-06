@@ -1,8 +1,9 @@
 {
   "name": "miso-shopify-js-sdk",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Miso JS SDK for Shopify integration",
   "main": "dist/index.js",
+  "files": ["dist/*.js"],
   "scripts": {
     "dev": "webpack serve --mode=development",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
