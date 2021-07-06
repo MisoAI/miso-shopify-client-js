@@ -6,7 +6,7 @@ class Logger {
       if (this[key]) {
         return {
           ...ctx,
-          [key]: this[ctx]
+          [key]: this[key]
         }
       }
       return ctx
