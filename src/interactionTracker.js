@@ -36,7 +36,6 @@ export default class InteractionTracker {
   }
 
   unregister () {
-    console.warn('unhook my old body')
     hookCartChange.unhook()
   }
 

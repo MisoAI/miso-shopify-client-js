@@ -2,91 +2,96 @@ import logger from './logger'
 import Tracker from './interactionTracker'
 import { genUuid, getConfigFromScript } from './utils'
 
-const misoSDK = {};
+const ANONYMOUS_SESSION_KEY = 'misoAnonymousKey'
+let theTracker
 
-(function (window, document) {
-  const ANONYMOUS_SESSION_KEY = 'misoAnonymousKey'
-
-  function getUserId () {
-    const ret = {}
-    try {
-      const curr =
-        window.ShopifyAnalytics.meta.page.customerId ||
-        window.meta.page.customerId ||
-        window._st.cid
-      if (curr) {
-        ret.customerId = `${curr}`
-      }
-    } catch (e) { }
-
-    try {
-      const curr = window.ShopifyAnalytics.lib.user().traits().uniqToken
-      if (curr) {
-        ret.anonymousId = `${curr}`
-      }
-    } catch (e) { }
-
-    if (!ret.anonymousId) {
-      ret.anonymousId = window.sessionStorage.getItem(ANONYMOUS_SESSION_KEY) || genUuid()
-      window.sessionStorage.setItem(ANONYMOUS_SESSION_KEY, ret.anonymousId)
+function getUserId () {
+  const ret = {}
+  try {
+    const curr =
+      window.ShopifyAnalytics.meta.page.customerId ||
+      window.meta.page.customerId ||
+      window._st.cid
+    if (curr) {
+      ret.customerId = `${curr}`
     }
-    return ret
+  } catch (e) { }
+
+  try {
+    const curr = window.ShopifyAnalytics.lib.user().traits().uniqToken
+    if (curr) {
+      ret.anonymousId = `${curr}`
+    }
+  } catch (e) { }
+
+  if (!ret.anonymousId) {
+    ret.anonymousId = window.sessionStorage.getItem(ANONYMOUS_SESSION_KEY) || genUuid()
+    window.sessionStorage.setItem(ANONYMOUS_SESSION_KEY, ret.anonymousId)
+  }
+  return ret
+}
+
+function setupEnv ({ apiKey, isDryRun } = {}) {
+  if (!window || !window.ShopifyAnalytics) {
+    logger.error('Cannot find ShopifyAnalytics')
+    return
+  }
+  const pageMeta = window.ShopifyAnalytics.meta.page || {}
+  const { pageType, resourceId } = pageMeta
+  const { customerId, anonymousId } = getUserId()
+  if (!pageType) {
+    logger.error('Cannot find page type')
+    return
   }
 
-  function setupEnv () {
-    if (!window || !window.ShopifyAnalytics) {
-      logger.error('Cannot find ShopifyAnalytics')
-      return
-    }
-    const pageMeta = window.ShopifyAnalytics.meta.page || {}
-    const { pageType, resourceId } = pageMeta
-    const { customerId, anonymousId } = getUserId()
-    if (!pageType) {
-      logger.error('Cannot find page type')
-      return
-    }
-
-    const apiKey = getConfigFromScript('api_key')
-    const isDryRun = process.env.NODE_ENV === 'development' || !apiKey
-
-    logger.setCtx('isDryRun', isDryRun)
-    logger.setCtx('domain', window.location.host)
-    if (apiKey) {
-      logger.setCtx('apiKey', apiKey)
-    } else {
-      logger.error('API Key not found')
-      logger.setCtx('apiKey', '')
-    }
-
-    return {
-      pageType,
-      resourceId,
-      customerId,
-      anonymousId,
-      apiKey,
-      isDryRun
-    }
+  if (apiKey === undefined) {
+    apiKey = getConfigFromScript('api_key')
+  }
+  if (isDryRun === undefined) {
+    isDryRun = process.env.NODE_ENV === 'development' || !apiKey
   }
 
-  function main () {
-    const ctx = setupEnv()
-    if (!ctx) {
-      return
-    }
-
-    // avoid duplicate register
-    if (misoSDK.tracker && misoSDK.tracker.unregister) {
-      // TODO: handle register correctly
-      misoSDK.tracker.unregister()
-    }
-
-    // register our own
-    const tracker = new Tracker(window, ctx)
-    tracker.register()
-    misoSDK.tracker = tracker
+  logger.setCtx('isDryRun', isDryRun)
+  logger.setCtx('domain', window.location.host)
+  if (apiKey) {
+    logger.setCtx('apiKey', apiKey)
+  } else {
+    logger.error('API Key not found')
+    logger.setCtx('apiKey', '')
   }
 
-  main()
-})(window, document)
+  return {
+    pageType,
+    resourceId,
+    customerId,
+    anonymousId,
+    apiKey,
+    isDryRun
+  }
+}
 
-export default misoSDK
+export function init ({ apiKey, isDryRun } = {}) {
+  const ctx = setupEnv({ apiKey, isDryRun })
+  if (!ctx) {
+    return
+  }
+
+  if (theTracker) {
+    theTracker.unregister()
+  }
+
+  // register our own
+  theTracker = new Tracker(window, ctx)
+  theTracker.register()
+
+  return theTracker
+}
+
+export function getTracker () {
+  return theTracker
+}
+
+if (getConfigFromScript('api_key')) {
+  // auto init myself when there's sufficient info
+  init()
+}
