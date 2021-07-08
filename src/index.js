@@ -2,6 +2,8 @@ import logger from './logger'
 import Tracker from './interactionTracker'
 import { genUuid, getConfigFromScript } from './utils'
 
+const misoSDK = {};
+
 (function (window, document) {
   const ANONYMOUS_SESSION_KEY = 'misoAnonymousKey'
 
@@ -53,6 +55,7 @@ import { genUuid, getConfigFromScript } from './utils'
       logger.setCtx('apiKey', apiKey)
     } else {
       logger.error('API Key not found')
+      logger.setCtx('apiKey', '')
     }
 
     return {
@@ -71,9 +74,19 @@ import { genUuid, getConfigFromScript } from './utils'
       return
     }
 
+    // avoid duplicate register
+    if (misoSDK.tracker && misoSDK.tracker.unregister) {
+      // TODO: handle register correctly
+      misoSDK.tracker.unregister()
+    }
+
+    // register our own
     const tracker = new Tracker(window, ctx)
-    tracker.registerPageHandler()
+    tracker.register()
+    misoSDK.tracker = tracker
   }
 
   main()
 })(window, document)
+
+export default misoSDK
