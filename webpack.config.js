@@ -1,4 +1,6 @@
 const path = require('path')
+const dotenv = require('dotenv')
+const webpack = require('webpack')
 
 module.exports = {
   mode: 'production',
@@ -9,6 +11,11 @@ module.exports = {
     host: process.env.HOST || 'localhost',
     hot: true
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(dotenv.config().parsed)
+    })
+  ],
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',

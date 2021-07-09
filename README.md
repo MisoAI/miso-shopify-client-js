@@ -47,6 +47,14 @@ For detail usage of each interactions, please visit [Miso API document](https://
 
 - Node 12
 
+## Environment Variable
+
+Create .env file from env.sample, and webpack will pick variable in .env automatically.
+
+``bash
+cp env.sample .env
+```
+
 ## Dev Requirement
 
 1. Setup git commit template by
