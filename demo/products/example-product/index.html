@@ -1,27 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
-    <title>Test document</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+  <title>Test document</title>
+  <style>
+    .product__forms {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 2rem;
+      row-gap: 2rem;
+    }
+    .product__forms h2 {
+      margin-top: 0;
+    }
+  </style>
 </head>
 <body>
-    <div class="mw8 center pv4">
-        <h1>Product | Sample test page for shopify integration</h1>
+  <div class="mw8 center pv4">
+    <h1>Product | Sample test page for shopify integration</h1>
+    <div class="product__forms">
+      <div class="ba b--moon-gray h-100 pa3">
+        <h2>Add to cart via XHR</h2>
+        <form action="/cart/add" id="xhr-form">
+          <input type="submit" value="Send XHR!">
+        </form>
+      </div>
+      <div class="ba b--moon-gray h-100 pa3">
+        <h2>Add to cart via fetch</h2>
+      </div>
+      <div class="ba b--moon-gray h-100 pa3">
+        <h2>Add to cart via form post</h2>
+      </div>
     </div>
-    <script>
-        ShopifyAnalytics = {
-            meta: {
-                page: {
-                    pageType: 'product',
-                    resourceId: 'my-resource-id',
-                    customerId: 'my-customer-id'
-                }
-            }
+  </div>
+  <script>
+    ShopifyAnalytics = {
+      meta: {
+        page: {
+          pageType: 'product',
+          resourceId: 'my-resource-id',
+          customerId: 'my-customer-id'
         }
-    </script>
-    <script src="/index.js?api_key=test_api"></script>
+      }
+    }
+    document.querySelector('#xhr-form').addEventListener('submit', (e) => {
+      const body = {
+        id: 'xhr-variant-id',
+        quantity: 3
+      }
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', '/cart/add')
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
+      xhr.send(JSON.stringify(body))
+      e.preventDefault()
+    })
+  </script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/index.js?api_key=test_api"></script>
 </body>
 </html>

@@ -9,7 +9,13 @@ module.exports = {
     static: path.resolve(__dirname, 'demo'),
     port: process.env.PORT || 3000,
     host: process.env.HOST || 'localhost',
-    hot: true
+    hot: true,
+    proxy: [
+      {
+        context: ['/products/*.js', '/cart/**', '/cart*'],
+        target: 'http://localhost:3001'
+      }
+    ]
   },
   plugins: [
     new webpack.DefinePlugin({

@@ -51,7 +51,7 @@ export default class InteractionTracker {
 
     const body = JSON.stringify(payload)
     if (this.ctx.isDryRun) {
-      console.log(`[SEND INTERACTION] to ${this.endpoint} : ${type} - ${body}`)
+      console.log(`[${type}] to ${this.endpoint}\n-----------------\n${body}`)
       return
     }
     const resp = await window.fetch(this.endpoint, {
@@ -71,7 +71,10 @@ export default class InteractionTracker {
   async getProductDetail (productSlug) {
     const productEndpoint = `//${window.location.host}/products/${productSlug}.js`
     const productResp = await window.fetch(productEndpoint)
-    let productDetail = {}
+    let productDetail = {
+      id: this.ctx.resourceId,
+      variants: []
+    }
     if (productResp.status === 200) {
       productDetail = await productResp.json()
     }
