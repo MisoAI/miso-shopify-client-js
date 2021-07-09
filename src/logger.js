@@ -1,4 +1,33 @@
+import * as Sentry from '@sentry/browser'
+import { Integrations } from '@sentry/tracing'
+
 const CTX_LIST = ['apiKey', 'domain', 'isDryRun']
+
+let isSentryEnabled = false
+
+function initSentry (domain) {
+  const dsn = process.env.SENTRY_DSN
+  const release = process.env.RELEASE
+
+  if (!dsn) {
+    return
+  }
+  const opt = {
+    dsn,
+    integrations: [new Integrations.BrowserTracing()],
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+    environment: domain
+  }
+
+  if (release) {
+    opt.release = release
+  }
+  Sentry.init(opt)
+  isSentryEnabled = true
+}
 
 class Logger {
   ctx () {
@@ -17,14 +46,25 @@ class Logger {
     if (CTX_LIST.indexOf(key) >= 0) {
       this[key] = val
     }
+    if (key === 'domain') {
+      initSentry(val)
+    }
   }
 
   error (msg) {
-    console.error(`[ERROR] ${msg}`, this.ctx())
+    if (isSentryEnabled) {
+      Sentry.captureException(msg)
+    } else {
+      console.error(`[ERROR] ${msg}`, this.ctx())
+    }
   }
 
   warning (msg) {
-    console.warn(`[WARN] ${msg}`)
+    if (isSentryEnabled) {
+      Sentry.captureMessage(msg)
+    } else {
+      console.warn(`[WARN] ${msg}`)
+    }
   }
 }
 

@@ -152,7 +152,7 @@ export async function hook (window, tracker) {
             quantity: 0
           }
         }
-        ret.items[id].quantity += item.quantity
+        ret.items[id].quantity += Number.parseInt(item.quantity) || 0
       }
     })
     return ret
