@@ -12,6 +12,7 @@
     "build:dev": "webpack --mode=development",
     "build": "webpack"
   },
+  "repository": "gitlab:askmiso/shopify-js-sdk",
   "author": "ddio <ddio@askmiso.com>",
   "license": "MIT",
   "devDependencies": {
