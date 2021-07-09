@@ -51,7 +51,7 @@ For detail usage of each interactions, please visit [Miso API document](https://
 
 Create .env file from env.sample, and webpack will pick variable in .env automatically.
 
-``bash
+```bash
 cp env.sample .env
 ```
 

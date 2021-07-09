@@ -1,6 +1,6 @@
 {
   "name": "miso-shopify-js-sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Miso JS SDK for Shopify integration",
   "main": "dist/index.js",
   "files": [
