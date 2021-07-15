@@ -59,7 +59,7 @@ class Logger {
     }
   }
 
-  warning (msg) {
+  warn (msg) {
     if (isSentryEnabled) {
       Sentry.captureMessage(msg)
     } else {
