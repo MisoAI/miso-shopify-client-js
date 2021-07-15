@@ -19,6 +19,13 @@ export default class InteractionTracker {
     }
     this.endpoint = `${API_ENDPOINT}interactions?api_key=${window.encodeURIComponent(apiKey)}`
 
+    this.skippedPage = ['collections', 'blog', 'page', 'home', 'searchResults'].reduce((map, key) => {
+      return {
+        ...map,
+        [key]: true
+      }
+    }, {})
+
     this.pageHandler = {
       product: this.handleDetailPage,
       article: this.handleArticlePage,
@@ -27,6 +34,9 @@ export default class InteractionTracker {
   }
 
   register () {
+    if (this.skippedPage[this.ctx.pageType]) {
+      return
+    }
     const handler = this.pageHandler[this.ctx.pageType]
     if (handler) {
       handler.call(this)
