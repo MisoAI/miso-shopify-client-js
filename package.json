@@ -1,22 +1,22 @@
 {
   "name": "miso-shopify-js-sdk",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "Miso JS SDK for Shopify integration",
   "main": "dist/index.js",
   "files": [
-    "dist/*.js"
+    "dist/*"
   ],
   "scripts": {
-    "dev": "concurrently 'webpack serve --mode=development' 'nodemon node mock-server/app.js'",
+    "dev": "concurrently 'webpack serve --env mode=development' 'nodemon node mock-server/app.js'",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
-    "build:dev": "webpack --mode=development",
-    "build": "webpack"
+    "build:dev": "webpack --env mode=development",
+    "build": "webpack --env mode=production"
   },
-  "repository": "gitlab:askmiso/shopify-js-sdk",
   "author": "ddio <ddio@askmiso.com>",
   "license": "MIT",
   "devDependencies": {
     "@koa/router": "^10.0.0",
+    "@sentry/webpack-plugin": "^1.16.0",
     "concurrently": "^6.2.0",
     "dotenv": "^10.0.0",
     "eslint": "^7.29.0",

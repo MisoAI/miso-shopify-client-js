@@ -8,7 +8,7 @@ let isSentryEnabled = false
 
 function initSentry (domain) {
   const dsn = process.env.SENTRY_DSN
-  const release = process.env.RELEASE
+  const release = process.env.release
 
   if (!dsn) {
     return
@@ -43,6 +43,8 @@ function initSentry (domain) {
 
   if (release) {
     opt.release = release
+  } else {
+    opt.release = 'dev'
   }
   Sentry.init(opt)
   isSentryEnabled = true
@@ -70,7 +72,7 @@ class Logger {
     }
   }
 
-  genError(msg) {
+  genError (msg) {
     if (typeof msg === 'string') {
       return new Error(msg)
     }
