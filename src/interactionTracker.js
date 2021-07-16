@@ -4,7 +4,7 @@ import logger from './logger'
 import { getValFromQuery, getSlugFromPath } from './utils'
 
 let window
-const API_ENDPOINT = 'https://api.askmiso.com/v1/'
+export const API_ENDPOINT = 'https://api.askmiso.com/v1/'
 
 export default class InteractionTracker {
   constructor (theWindow, { customerId, anonymousId, pageType, resourceId, apiKey, isDryRun = true } = {}) {
@@ -19,6 +19,13 @@ export default class InteractionTracker {
     }
     this.endpoint = `${API_ENDPOINT}interactions?api_key=${window.encodeURIComponent(apiKey)}`
 
+    this.skippedPage = ['collections', 'blog', 'page', 'home', 'searchResults'].reduce((map, key) => {
+      return {
+        ...map,
+        [key]: true
+      }
+    }, {})
+
     this.pageHandler = {
       product: this.handleDetailPage,
       article: this.handleArticlePage,
@@ -27,6 +34,9 @@ export default class InteractionTracker {
   }
 
   register () {
+    if (this.skippedPage[this.ctx.pageType]) {
+      return
+    }
     const handler = this.pageHandler[this.ctx.pageType]
     if (handler) {
       handler.call(this)
@@ -64,7 +74,12 @@ export default class InteractionTracker {
       mode: 'cors'
     })
     if (resp.status !== 200) {
-      logger.error(`Invalid "${type}" interaction response, payload: ${body}`)
+      let msg = `[${type}] get ${resp.status}`
+      if (resp.body) {
+        const body = await resp.text()
+        msg += `, resp: ${body}`
+      }
+      logger.error(msg)
     }
   }
 

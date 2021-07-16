@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/browser'
 import { Integrations } from '@sentry/tracing'
+import { API_ENDPOINT } from './interactionTracker'
 
 const CTX_LIST = ['apiKey', 'domain', 'isDryRun']
 
@@ -7,7 +8,7 @@ let isSentryEnabled = false
 
 function initSentry (domain) {
   const dsn = process.env.SENTRY_DSN
-  const release = process.env.RELEASE
+  const release = process.env.release
 
   if (!dsn) {
     return
@@ -19,11 +20,31 @@ function initSentry (domain) {
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
-    environment: domain
+    environment: domain,
+    allowUrls: [
+      // only log our own event
+      /miso-shopify-js-sdk/,
+      /misoSDK\/\./
+    ],
+    beforeSend (event) {
+      if (event.breadcrumbs) {
+        event.breadcrumbs = event.breadcrumbs.map((bread) => {
+          if (bread.category !== 'fetch' || !bread.data.url.startsWith(API_ENDPOINT)) {
+            return bread
+          }
+          // publishable key doesn't violate PII
+          bread.data.url = bread.data.url.replace('api_key', 'the_key')
+          return bread
+        })
+      }
+      return event
+    }
   }
 
   if (release) {
     opt.release = release
+  } else {
+    opt.release = 'dev'
   }
   Sentry.init(opt)
   isSentryEnabled = true
@@ -51,19 +72,26 @@ class Logger {
     }
   }
 
+  genError (msg) {
+    if (typeof msg === 'string') {
+      return new Error(msg)
+    }
+    return msg
+  }
+
   error (msg) {
     if (isSentryEnabled) {
-      Sentry.captureException(msg)
+      Sentry.captureException(this.genError(msg))
     } else {
       console.error(`[ERROR] ${msg}`, this.ctx())
     }
   }
 
-  warning (msg) {
+  warn (msg) {
     if (isSentryEnabled) {
-      Sentry.captureMessage(msg)
+      Sentry.captureMessage(this.genError(msg))
     } else {
-      console.warn(`[WARN] ${msg}`)
+      console.warn(`[WARN] ${msg}`, this.ctx())
     }
   }
 }
