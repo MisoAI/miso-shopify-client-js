@@ -12,7 +12,10 @@
     "build:dev": "webpack --env mode=development",
     "build": "webpack --env mode=production"
   },
-  "author": "ddio <ddio@askmiso.com>",
+  "contributors": [
+    "ddio <ddio@askmiso.com>",
+    "simonpai <simon.pai@askmiso.com>"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@koa/router": "^10.0.0",

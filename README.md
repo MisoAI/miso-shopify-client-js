@@ -30,7 +30,7 @@ misoSDK.init({ apiKey: 'yourMisoPublishableKey' })
 
 ### Interaction collection
 
-Miso Shopify JS SDK parse Shopify page and find important interaction signal at best. As theme of each Shopify store differ, the SDK might failed to catch interaction in some cases. Please [report an issue](https://gitlab.com/askmiso/shopify-js-sdk/-/issues) if you find this happens.
+Miso Shopify JS SDK parse Shopify page and find important interaction signal at best. As theme of each Shopify store differ, the SDK might failed to catch interaction in some cases. Please [report an issue](https://github.com/askmiso/miso-shopify-client-js/issues) if you find this happens.
 
 The SDK supports capturing the following interaction:
 
