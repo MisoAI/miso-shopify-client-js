@@ -1,17 +1,27 @@
 {
-  "name": "miso-shopify-js-sdk",
-  "version": "0.2.4",
-  "description": "Miso JS SDK for Shopify integration",
+  "name": "@miso.ai/shopify-client-js",
+  "description": "Miso's Shopify client-side script",
   "main": "dist/index.js",
   "files": [
     "dist/*"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "concurrently 'webpack serve --env mode=development' 'nodemon node mock-server/app.js'",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "build:dev": "webpack --env mode=development",
     "build": "webpack --env mode=production"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:MisoAI/miso-shopify-client-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MisoAI/miso-shopify-client-js/issues"
+  },
+  "homepage": "https://github.com/MisoAI/miso-shopify-client-js#readme",
   "contributors": [
     "ddio <ddio@askmiso.com>",
     "simonpai <simon.pai@askmiso.com>"
