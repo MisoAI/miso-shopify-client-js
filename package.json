@@ -9,6 +9,7 @@
     "access": "public"
   },
   "scripts": {
+    "test": "echo later",
     "dev": "concurrently 'webpack serve --env mode=development' 'nodemon node mock-server/app.js'",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "build:dev": "webpack --env mode=development",
