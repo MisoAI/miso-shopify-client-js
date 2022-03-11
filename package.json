@@ -1,5 +1,5 @@
 {
-  "name": "@miso.ai/shopify-client-js",
+  "name": "@miso.ai/shopify-client",
   "description": "Miso's Shopify client-side script",
   "main": "dist/index.js",
   "files": [
