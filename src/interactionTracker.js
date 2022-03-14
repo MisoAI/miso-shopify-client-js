@@ -1,4 +1,4 @@
-import { hook as hookCartChange } from './events/cartChange'
+import { hook as hookCartChange, unhook as unhookCartChange } from './events/cartChange'
 
 import logger from './logger'
 import { getValFromQuery, getSlugFromPath } from './utils'
@@ -37,6 +37,9 @@ export default class InteractionTracker {
     if (this.skippedPage[this.ctx.pageType]) {
       return
     }
+    // register add to / remove from cart
+    hookCartChange(window, this)
+
     const handler = this.pageHandler[this.ctx.pageType]
     if (handler) {
       handler.call(this)
@@ -46,7 +49,7 @@ export default class InteractionTracker {
   }
 
   unregister () {
-    hookCartChange.unhook()
+    unhookCartChange()
   }
 
   async sendInteraction (type, payload) {
@@ -105,8 +108,6 @@ export default class InteractionTracker {
   }
 
   async handleDetailPage () {
-    // register add to cart
-    hookCartChange(window, this)
     // send product detail page view
     let variantId = getValFromQuery('variant')
     let productDetail = { variants: [] }
