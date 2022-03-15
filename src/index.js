@@ -44,7 +44,7 @@ function setupEnv ({ apiKey, isDryRun } = {}) {
     apiKey = getConfigFromScript('api_key')
   }
   if (isDryRun === undefined) {
-    isDryRun = process.env.NODE_ENV === 'development' || !apiKey
+    isDryRun = process.env.NODE_ENV === 'development' || !apiKey || getConfigFromScript('dry_run') === 'true'
   }
 
   logger.setCtx('isDryRun', isDryRun)
