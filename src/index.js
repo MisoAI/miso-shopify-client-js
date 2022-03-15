@@ -37,12 +37,8 @@ function setupEnv ({ apiKey, isDryRun } = {}) {
     return
   }
   const pageMeta = window.ShopifyAnalytics.meta.page || {}
-  const { pageType, resourceId } = pageMeta
+  const { pageType = '_unknown', resourceId } = pageMeta
   const { customerId, anonymousId } = getUserId()
-  if (!pageType) {
-    logger.error('Cannot find page type')
-    return
-  }
 
   if (apiKey === undefined) {
     apiKey = getConfigFromScript('api_key')
