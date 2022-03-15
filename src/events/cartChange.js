@@ -159,11 +159,11 @@ export function hook(window, tracker) {
   })();
   unlistenCartAdd = listen({
     method: 'POST',
-    path: '/cart/add'
+    path: s => s.startsWith('/cart/add')
   }, handleCartAdd(tracker));
   unlistenCartChange = listen({
     method: 'POST',
-    path: '/cart/change'
+    path: s => s.startsWith('/cart/change')
   }, handleCartChange(tracker));
 }
 
