@@ -34,12 +34,12 @@ export default class InteractionTracker {
   }
 
   register () {
-    if (this.skippedPage[this.ctx.pageType]) {
-      return
-    }
     // register add to / remove from cart
     hookCartChange(window, this)
 
+    if (this.skippedPage[this.ctx.pageType]) {
+      return
+    }
     const handler = this.pageHandler[this.ctx.pageType]
     if (handler) {
       handler.call(this)
