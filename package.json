@@ -13,7 +13,8 @@
     "dev": "concurrently 'webpack serve --env mode=development' 'nodemon node mock-server/app.js'",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "build:dev": "webpack --env mode=development",
-    "build": "webpack --env mode=production"
+    "build": "webpack --env mode=production",
+    "post-publish": "curl https://purge.jsdelivr.net/npm/@miso.ai/shopify-client@latest"
   },
   "repository": {
     "type": "git",
