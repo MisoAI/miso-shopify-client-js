@@ -44,7 +44,7 @@ function setupEnv ({ apiKey, isDryRun } = {}) {
     apiKey = getConfigFromScript('api_key')
   }
   if (isDryRun === undefined) {
-    isDryRun = process.env.NODE_ENV === 'development' || !apiKey || getConfigFromScript('dry_run') === 'true'
+    isDryRun = /*process.env.NODE_ENV === 'development' ||*/ !apiKey || getConfigFromScript('dry_run') === 'true'
   }
 
   logger.setCtx('isDryRun', isDryRun)
@@ -66,7 +66,7 @@ function setupEnv ({ apiKey, isDryRun } = {}) {
   }
 }
 
-export function init ({ apiKey, isDryRun } = {}) {
+function init ({ apiKey, isDryRun } = {}) {
   const ctx = setupEnv({ apiKey, isDryRun })
   if (!ctx) {
     return
@@ -80,12 +80,14 @@ export function init ({ apiKey, isDryRun } = {}) {
   theTracker = new Tracker(window, ctx)
   theTracker.register()
 
-  return theTracker
+  // return theTracker
 }
 
-export function getTracker () {
+/*
+function getTracker () {
   return theTracker
 }
+*/
 
 if (getConfigFromScript('api_key')) {
   // auto init myself when there's sufficient info

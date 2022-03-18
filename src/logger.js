@@ -1,11 +1,12 @@
-import * as Sentry from '@sentry/browser'
-import { Integrations } from '@sentry/tracing'
-import { API_ENDPOINT } from './interactionTracker'
+//import * as Sentry from '@sentry/browser'
+//import { Integrations } from '@sentry/tracing'
+//import { API_ENDPOINT } from './interactionTracker'
 
 const CTX_LIST = ['apiKey', 'domain', 'isDryRun']
 
 let isSentryEnabled = false
 
+/*
 function initSentry (domain) {
   const dsn = process.env.SENTRY_DSN
   const release = process.env.release
@@ -49,6 +50,7 @@ function initSentry (domain) {
   Sentry.init(opt)
   isSentryEnabled = true
 }
+*/
 
 class Logger {
   ctx () {
@@ -68,7 +70,7 @@ class Logger {
       this[key] = val
     }
     if (key === 'domain') {
-      initSentry(val)
+      //initSentry(val)
     }
   }
 
@@ -81,7 +83,7 @@ class Logger {
 
   error (msg) {
     if (isSentryEnabled) {
-      Sentry.captureException(this.genError(msg))
+      //Sentry.captureException(this.genError(msg))
     } else {
       console.error(`[ERROR] ${msg}`, this.ctx())
     }
@@ -89,7 +91,7 @@ class Logger {
 
   warn (msg) {
     if (isSentryEnabled) {
-      Sentry.captureMessage(this.genError(msg))
+      //Sentry.captureMessage(this.genError(msg))
     } else {
       console.warn(`[WARN] ${msg}`, this.ctx())
     }
