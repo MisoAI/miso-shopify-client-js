@@ -1,5 +1,3 @@
-import { hook as hookCartChange, unhook as unhookCartChange } from './events/cartChange'
-
 import logger from './logger'
 import { getValFromQuery, getSlugFromPath } from './utils'
 
@@ -34,9 +32,6 @@ export default class InteractionTracker {
   }
 
   register () {
-    // register add to / remove from cart
-    hookCartChange(window, this)
-
     if (this.skippedPage[this.ctx.pageType]) {
       return
     }
@@ -49,7 +44,6 @@ export default class InteractionTracker {
   }
 
   unregister () {
-    unhookCartChange()
   }
 
   async sendInteraction (type, payload) {

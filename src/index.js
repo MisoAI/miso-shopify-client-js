@@ -1,9 +1,8 @@
-import logger from './logger'
+import CartObserver from './event/cart';
 import Tracker from './interactionTracker'
 import { genUuid, getConfigFromScript } from './utils'
 
 const ANONYMOUS_SESSION_KEY = 'misoAnonymousKey'
-let theTracker
 
 function getUserId () {
   const ret = {}
@@ -31,65 +30,56 @@ function getUserId () {
   return ret
 }
 
-function setupEnv ({ apiKey, isDryRun } = {}) {
+function setupEnv () {
   if (!window || !window.ShopifyAnalytics) {
-    logger.error('Cannot find ShopifyAnalytics')
-    return
+    throw new Error('Cannot find ShopifyAnalytics');
   }
   const pageMeta = window.ShopifyAnalytics.meta.page || {}
   const { pageType = '_unknown', resourceId } = pageMeta
   const { customerId, anonymousId } = getUserId()
-
-  if (apiKey === undefined) {
-    apiKey = getConfigFromScript('api_key')
-  }
-  if (isDryRun === undefined) {
-    isDryRun = /*process.env.NODE_ENV === 'development' ||*/ !apiKey || getConfigFromScript('dry_run') === 'true'
-  }
-
-  logger.setCtx('isDryRun', isDryRun)
-  logger.setCtx('domain', window.location.host)
-  if (apiKey) {
-    logger.setCtx('apiKey', apiKey)
-  } else {
-    logger.error('API Key not found')
-    logger.setCtx('apiKey', '')
-  }
 
   return {
     pageType,
     resourceId,
     customerId,
     anonymousId,
-    apiKey,
-    isDryRun
   }
 }
 
-function init ({ apiKey, isDryRun } = {}) {
-  const ctx = setupEnv({ apiKey, isDryRun })
-  if (!ctx) {
-    return
+function handleCartEvent(tracker, data) {
+  if (!data.difference || !data.difference.items) {
+    return;
+  }
+  const cart_token = data.newState && data.newState.token;
+  const context = { custom_context: { cart_token } };
+
+  for (const item of data.difference.items) {
+    const quantity = item.quantity;
+    const product_ids = [`${item.variant_id}`];
+    const product_group_ids = [`${item.product_id}`];
+
+    if (quantity > 0) {
+      const quantities = [ item.quantity ];
+      tracker.sendInteraction('add_to_cart', { product_ids, product_group_ids, quantities, context });
+    } else if (quantity < 0) {
+      tracker.sendInteraction('remove_from_cart', { product_ids, product_group_ids, context });
+    }
+  }
+}
+
+(function init() {
+  const apiKey = getConfigFromScript('api_key');
+  const dryRun = getConfigFromScript('dry_run') === 'true';
+  if (!apiKey && !dryRun) {
+    throw new Error('Expected api_key or dry_run in script URL parameters');
   }
 
-  if (theTracker) {
-    theTracker.unregister()
-  }
+  const ctx = { apiKey, dryRun, ...setupEnv() };
 
-  // register our own
-  theTracker = new Tracker(window, ctx)
-  theTracker.register()
+  const tracker = new Tracker(window, ctx);
+  tracker.register();
 
-  // return theTracker
-}
+  const cart = new CartObserver();
+  cart.any((_, data) => handleCartEvent(tracker, data));
 
-/*
-function getTracker () {
-  return theTracker
-}
-*/
-
-if (getConfigFromScript('api_key')) {
-  // auto init myself when there's sufficient info
-  init()
-}
+})();
