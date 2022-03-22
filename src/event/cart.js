@@ -5,7 +5,8 @@ import { cart as fetchCartInfo } from './api';
 
 export default class CartObserver {
 
-  constructor({ autoget = true, deduplicate = true, error } = {}) {
+  constructor({ autoget = true, deduplicate = true, error, fetchObserver } = {}) {
+    // TODO: support listening to request side as well
     this._options = { autoget, deduplicate };
 
     const events = new EventEmitter({ error });
@@ -16,16 +17,15 @@ export default class CartObserver {
       once: events.once.bind(events),
     });
 
-    const fetchObserver = new FetchObserver();
+    fetchObserver = fetchObserver || new FetchObserver();
     const options = {
       method: ['GET', 'POST'],
       test: ({ path }) => path.indexOf('/cart') > -1,
     };
     this._unsubscribeFetchObserver = fetchObserver.observe('response', options, this._handleFetchResponse.bind(this));
 
-    if (this._options.autoget) {
-      this.fetchCartInfo();
-    }
+    // if autoget is on, we want to trigger a fetch ASAP
+    this._autoget();
   }
 
   get state() {
@@ -64,9 +64,13 @@ export default class CartObserver {
       body = deepFreeze(await response.clone().json());
     }
   
-    const data = {};
+    const data = {
+      source: 'fetch',
+      phase: 'response',
+    };
     if (body) {
       if (action === 'add') {
+        // if action is add, the response body is not a full cart state, so use a different prop name
         data.response = body;
       } else {
         data.newState = body;
@@ -76,31 +80,36 @@ export default class CartObserver {
       data.oldState = this._state;
     }
   
-    // if no body, emit event for any action except for get action in dedupe mode
-    // since there is no data to work on, we are done with it
     if (!body) {
-      if (!this._options.deduplicate || action !== 'get') {
-        this._events.emit(action, Object.freeze(data));
+      // if the action is non-trivial or dedupe is off, we shall emit regardlessly
+      if (action !== 'get' || !this._options.deduplicate) {
+        this._emit(action, data);
       }
+      // if the action is non-trivial and autoget is on, we want to trigger a fetch
+      if (action !== 'get') {
+        this._autoget();
+      }
+      // there is no data to work on, so we are done here
       return;
     }
-    // if action is get, body is not full cart info, so emit then done
+    // if action is add, the response body is not a full cart state
     if (action === 'add') {
-      this._events.emit(action, Object.freeze(data));
-      if (this._options.autoget) {
-        this.fetchCartInfo();
-      }
+      // since add is non-trivial, we shall emit
+      this._emit(action, data);
+      // if autoget is on, we want to trigger a fetch
+      this._autoget();
+      // there is no data to work on, so we are done here
       return;
     }
-    // if this is the first cart info:
     if (!this._state) {
-      this._events.emit(action, Object.freeze(data));
+      // if this is the first cart state info, always emit
+      this._emit(action, data);
     } else {
       // if dedupe option is true, emit ony if cart is changed
       const difference = this._diffState(this._state, body);
       if (!this._options.deduplicate || difference.changed) {
         data.difference = difference;
-        this._events.emit(action, Object.freeze(data));
+        this._emit(action, data);
       }
     }
 
@@ -108,7 +117,18 @@ export default class CartObserver {
     this._state = body;
   }
 
+  _autoget() {
+    if (this._options.autoget) {
+      this.fetchCartInfo();
+    }
+  }
+
+  _emit(action, data) {
+    this._events.emit(action, Object.freeze(data));
+  }
+
   _diffState(oldState, newState) {
+    // consider state changed iff items are different or token has been updated
     const diff = {
       items: this._diffStateItems(oldState, newState)
     };

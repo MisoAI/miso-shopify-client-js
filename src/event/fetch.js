@@ -1,21 +1,36 @@
 import EventEmitter from './emitter';
 
+function getPath(resource) {
+  // TODO: handle fetch Request object
+  return `${resource}`;
+}
+
+function getMethod(resource, init) {
+  // TODO: handle fetch Request object
+  return init && init.method || 'GET';
+}
+
+function getEventEmitter() {
+  // TODO: make singleton here
+  const events = new EventEmitter();
+  const _fetch = window.fetch;
+  window.fetch = async function(resource, init) {
+    const path = getPath(resource);
+    const method = getMethod(resource, init);
+    const data = { resource, init, path, method };
+    events.emit('request', data);
+    const response = await _fetch.apply(this, arguments);
+    events.emit('response', Object.assign({ response }, data));
+    return response;
+  };
+  return events;
+}
+
 export default class FetchObserver {
 
   constructor() {
-    const events = this._events = new EventEmitter();
-
-    const _fetch = this._fetchBak = window.fetch;
-    const _getPath = this._getPath.bind(this);
-    window.fetch = async function(resource, init) {
-      const path = _getPath(resource);
-      const method = init && init.method || 'GET';
-      const context = { resource, init, path, method };
-      events.emit('request', context);
-      const response = await _fetch.apply(this, arguments);
-      events.emit('response', Object.assign({ response }, context));
-      return response;
-    };
+    // TODO: error handling
+    this._events = getEventEmitter();
   }
 
   observe(target, options, callback) {
@@ -24,9 +39,9 @@ export default class FetchObserver {
 
   // helper //
   _asPredicate(options) {
-    return (context) => {
-      const { path, method } = context;
-      if (typeof options.test === 'function' && !options.test(context)) {
+    return (data) => {
+      const { path, method } = data;
+      if (typeof options.test === 'function' && !options.test(data)) {
         return false;
       }
       if (options.path) {
@@ -47,14 +62,9 @@ export default class FetchObserver {
     };
   }
 
-  _getPath(resource) {
-    // TODO: handle fetch Request object
-    return resource;
-  }
-
   _wrapCallback(options, callback) {
     const predicate = this._asPredicate(options);
-    return (context) => predicate(context) && callback(context);
+    return (data) => predicate(data) && callback(data);
   }
 
 }
