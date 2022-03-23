@@ -16,34 +16,6 @@ export default class InteractionTracker {
       isDryRun
     }
     this.endpoint = `${API_ENDPOINT}interactions?api_key=${window.encodeURIComponent(apiKey)}`
-
-    this.skippedPage = ['collections', 'blog', 'page', 'home', 'searchResults'].reduce((map, key) => {
-      return {
-        ...map,
-        [key]: true
-      }
-    }, {})
-
-    this.pageHandler = {
-      product: this.handleDetailPage,
-      article: this.handleArticlePage,
-      collection: this.handleCollectionPage
-    }
-  }
-
-  register () {
-    if (this.skippedPage[this.ctx.pageType]) {
-      return
-    }
-    const handler = this.pageHandler[this.ctx.pageType]
-    if (handler) {
-      handler.call(this)
-    } else {
-      logger.warn(`No handler in ${window.location}`)
-    }
-  }
-
-  unregister () {
   }
 
   async sendInteraction (type, payload) {
@@ -80,57 +52,4 @@ export default class InteractionTracker {
     }
   }
 
-  async getProductDetail (productSlug) {
-    const productEndpoint = `//${window.location.host}/products/${productSlug}.js`
-    const productResp = await window.fetch(productEndpoint)
-    let productDetail = {
-      id: this.ctx.resourceId,
-      variants: []
-    }
-    if (productResp.status === 200) {
-      productDetail = await productResp.json()
-    }
-    return {
-      productId: `${productDetail.id}`,
-      variants: productDetail.variants.map(variant => {
-        return {
-          id: `${variant.id}`,
-          title: variant.title
-        }
-      })
-    }
-  }
-
-  async handleDetailPage () {
-    // send product detail page view
-    let variantId = getValFromQuery('variant')
-    let productDetail = { variants: [] }
-    const productSlug = getSlugFromPath('products')
-    if (productSlug) {
-      productDetail = await this.getProductDetail(productSlug)
-    }
-    if (!variantId && productDetail.variants.length) {
-      variantId = productDetail.variants[0].id
-    }
-    const payload = {
-      product_group_ids: [productDetail.productId]
-    }
-    if (variantId) {
-      payload.product_ids = [variantId]
-    }
-    this.sendInteraction('product_detail_page_view', payload)
-  }
-
-  handleArticlePage () {
-    this.sendInteraction('product_detail_page_view', {
-      product_ids: [`${this.ctx.resourceId}`]
-    })
-  }
-
-  handleCollectionPage () {
-    const collectionSlug = getSlugFromPath('collections')
-    this.sendInteraction('category_page_view', {
-      category: [collectionSlug]
-    })
-  }
 }

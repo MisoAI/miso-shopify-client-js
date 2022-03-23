@@ -1,5 +1,14 @@
 import { removeArrayItem } from './util';
 
+export function injectSubscribeMethods(obj, emitter) {
+  Object.assign(obj, {
+    on: emitter.on.bind(emitter),
+    any: emitter.any.bind(emitter),
+    once: emitter.once.bind(emitter),
+  });
+  return emitter;
+}
+
 export default class EventEmitter {
 
   constructor({ error } = {}) {

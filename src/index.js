@@ -1,5 +1,7 @@
 import CartObserver from './event/cart';
+import PageInfoObserver from './event/page';
 import Tracker from './interactionTracker'
+import { product as fetchProductInfo } from './event/api';
 import { genUuid, getConfigFromScript } from './utils'
 
 const ANONYMOUS_SESSION_KEY = 'misoAnonymousKey'
@@ -67,6 +69,63 @@ function handleCartEvent(tracker, data) {
   }
 }
 
+async function handlePageInfoChange(tracker, info) {
+  if (!info) {
+    return;
+  }
+  try {
+    switch (info.type) {
+      case 'home':
+        tracker.sendInteraction('home_page_view');
+        break;
+      case 'collection':
+        tracker.sendInteraction('category_page_view', toCategoryPageViewPayload(info));
+        break;
+      case 'product':
+        tracker.sendInteraction('product_detail_page_view', await toProductDetailPageViewPayload(info));
+        break;
+    }
+  } catch(e) {
+    // TODO: tracking here
+  }
+}
+
+function toCategoryPageViewPayload(info) {
+  if (!info.collectionHandle) {
+    throw new Error(`Collection handle not found: ${JSON.stringify(info)}`);
+  }
+  return {
+    category: [info.collectionHandle]
+  };
+}
+
+const productInfoCache = {};
+
+async function getProductInfo(handle) {
+  return productInfoCache[handle] || (productInfoCache[handle] = await fetchProductInfo(handle));
+}
+
+async function toProductDetailPageViewPayload(info) {
+  if (!info.productHandle) {
+    throw new Error(`Product handle not found: ${JSON.stringify(info)}`);
+  }
+  let variantId = info.variantId;
+  const productInfo = await getProductInfo(info.productHandle);
+  if (!variantId && productInfo.variants && productInfo.variants.length) {
+    variantId = `${productInfo.variants[0].id}`;
+  }
+  const productId = `${productInfo.id}`;
+
+  const payload = {};
+  if (productId) {
+    payload.product_group_ids = [productId];
+  }
+  if (variantId) {
+    payload.product_ids = [variantId];
+  }
+  return payload;
+}
+
 (function init() {
   const apiKey = getConfigFromScript('api_key');
   const dryRun = getConfigFromScript('dry_run') === 'true';
@@ -75,11 +134,13 @@ function handleCartEvent(tracker, data) {
   }
 
   const ctx = { apiKey, dryRun, ...setupEnv() };
-
   const tracker = new Tracker(window, ctx);
-  tracker.register();
 
-  const cart = new CartObserver();
-  cart.any((_, data) => handleCartEvent(tracker, data));
+  const cartObserver = new CartObserver();
+  cartObserver.any((_, data) => handleCartEvent(tracker, data));
+  cartObserver.start();
 
+  const pageInfoObserver = new PageInfoObserver();
+  pageInfoObserver.on('change', (data) => handlePageInfoChange(tracker, data));
+  pageInfoObserver.start();
 })();

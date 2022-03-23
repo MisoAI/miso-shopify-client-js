@@ -1,32 +1,38 @@
 import { deepFreeze } from './util';
-import EventEmitter from './emitter';
+import EventEmitter, { injectSubscribeMethods } from './emitter';
 import FetchObserver from './fetch';
 import { cart as fetchCartInfo } from './api';
 
 export default class CartObserver {
 
-  constructor({ autoget = true, deduplicate = true, error, fetchObserver } = {}) {
+  constructor({ autoget = true, deduplicate = true, errorHandler, restObserver } = {}) {
     // TODO: support listening to request side as well
     this._options = { autoget, deduplicate };
+    this._restObserver = restObserver || new FetchObserver();
+    this._events = injectSubscribeMethods(this, new EventEmitter({ error: errorHandler }));
+  }
 
-    const events = new EventEmitter({ error });
-    Object.assign(this, {
-      _events: events,
-      on: events.on.bind(events),
-      any: events.any.bind(events),
-      once: events.once.bind(events),
-    });
-
-    fetchObserver = fetchObserver || new FetchObserver();
+  start() {
+    if (this._unsubscribeRestObserver) {
+      return;
+    }
     const options = {
       method: ['GET', 'POST'],
       test: ({ path }) => path.indexOf('/cart') > -1,
     };
-    this._unsubscribeFetchObserver = fetchObserver.observe('response', options, this._handleFetchResponse.bind(this));
+    this._unsubscribeRestObserver = this._restObserver.observe('response', options, this._handleFetchResponse.bind(this));
 
     // if autoget is on, we want to trigger a fetch ASAP
     this._autoget();
   }
+
+  stop() {
+    if (!this._unsubscribeRestObserver) {
+      return;
+    }
+    this._unsubscribeRestObserver();
+    delete this._unsubscribeRestObserver;
+}
 
   get state() {
     return this._state;
@@ -34,10 +40,6 @@ export default class CartObserver {
 
   async fetchCartInfo() {
     await fetchCartInfo();
-  }
-
-  destroy() {
-    this._unsubscribeFetchObserver && this._unsubscribeFetchObserver();
   }
 
   _getActionType(path) {
