@@ -11,8 +11,8 @@ export function injectSubscribeMethods(obj, emitter) {
 
 export default class EventEmitter {
 
-  constructor({ error } = {}) {
-    this._error = error || (e => console.error(e));
+  constructor({ onError } = {}) {
+    this._error = onError || (e => console.error(e));
     this._named = {};
     this._unnamed = [];
   }

@@ -1,8 +1,8 @@
 import EventEmitter, { injectSubscribeMethods } from './emitter';
 
-function getEventEmitter({ error }) {
+function getEventEmitter({ onError }) {
   // TODO: make singleton here
-  const events = new EventEmitter({ error });
+  const events = new EventEmitter({ onError });
 
   const history = window.history;
 
@@ -33,8 +33,8 @@ function getEventEmitter({ error }) {
 
 export default class HistoryObserver {
 
-  constructor({ errorHandler }) {
-    injectSubscribeMethods(this, getEventEmitter({ error: errorHandler }));
+  constructor({ onError }) {
+    injectSubscribeMethods(this, getEventEmitter({ onError }));
   }
 
 }

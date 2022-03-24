@@ -20,24 +20,3 @@ export function getValFromQuery (valKey, query = '') {
   }
   return targetString.slice(valKey.length)
 }
-
-export function getSlugFromPath (slugKey) {
-  const pathTokens = window ? window.location.pathname.split('/') : []
-  // example: /collection/col-id/product-prod-id
-  for (let i = pathTokens.length - 2; i > 0; i--) {
-    if (!pathTokens[i]) {
-      continue
-    }
-    if (pathTokens[i] === slugKey) {
-      return pathTokens[i + 1]
-    }
-  }
-}
-
-export function genUuid () {
-  const tempUrl = URL.createObjectURL(new Blob())
-  const uuid = tempUrl.toString()
-  URL.revokeObjectURL(tempUrl)
-  // remove prefix (e.g. blob:null/, blob:www.test.com/, ...)
-  return uuid.substr(uuid.lastIndexOf('/') + 1)
-}

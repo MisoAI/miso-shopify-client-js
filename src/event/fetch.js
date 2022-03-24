@@ -10,9 +10,9 @@ function getMethod(resource, init) {
   return init && init.method || 'GET';
 }
 
-function getEventEmitter() {
+function getEventEmitter({ onError }) {
   // TODO: make singleton here
-  const events = new EventEmitter();
+  const events = new EventEmitter({ onError });
   const _fetch = window.fetch;
   window.fetch = async function(resource, init) {
     const path = getPath(resource);
@@ -28,9 +28,10 @@ function getEventEmitter() {
 
 export default class FetchObserver {
 
-  constructor() {
+  constructor({ onError }) {
     // TODO: error handling
-    this._events = getEventEmitter();
+    this._error = onError;
+    this._events = getEventEmitter({ onError });
   }
 
   observe(target, options, callback) {

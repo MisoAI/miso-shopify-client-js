@@ -5,11 +5,12 @@ import { cart as fetchCartInfo } from './api';
 
 export default class CartObserver {
 
-  constructor({ autoget = true, deduplicate = true, errorHandler, restObserver } = {}) {
+  constructor({ autoget = true, deduplicate = true, onError, restObserver } = {}) {
     // TODO: support listening to request side as well
     this._options = { autoget, deduplicate };
-    this._restObserver = restObserver || new FetchObserver();
-    this._events = injectSubscribeMethods(this, new EventEmitter({ error: errorHandler }));
+    this._error = onError;
+    this._restObserver = restObserver || new FetchObserver({ onError });
+    this._events = injectSubscribeMethods(this, new EventEmitter({ onError }));
   }
 
   start() {

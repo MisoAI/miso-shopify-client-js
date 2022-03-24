@@ -15,3 +15,9 @@ export function deepFreeze(obj) {
   }
   return Object.freeze(obj);
 }
+
+export function tryGet(fn) {
+  try {
+    return fn();
+  } catch(_) {}
+}
