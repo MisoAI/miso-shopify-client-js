@@ -9,9 +9,8 @@ export async function product(handle) {
 }
 
 async function getBodyOrThrow(response) {
-  const body = await response.json();
-  if (response.status >= 400 || body.status >= 400) {
-    throw new Error(`[${body.status}] ${body.message}: ${body.description}.`);
+  if (response.status >= 400) {
+    throw new Error(`[${response.status}] ${response.message}: ${response.description}.`);
   }
-  return body;
+  return await response.json();
 }
