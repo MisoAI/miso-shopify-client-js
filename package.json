@@ -1,7 +1,7 @@
 {
   "name": "@miso.ai/shopify-client",
   "description": "Miso's Shopify client-side script",
-  "main": "dist/index.js",
+  "main": "dist/miso-shopify.min.js",
   "files": [
     "dist/*"
   ],
@@ -13,7 +13,7 @@
     "clean": "npx rimraf lib dist es coverage types",
     "test": "echo later",
     "build": "GIT_HASH=$(git rev-parse ${GITHUB_SHA:-HEAD}) rollup -c",
-    "post-publish": "curl https://purge.jsdelivr.net/npm/@miso.ai/shopify-client@latest",
+    "purge-cdn": "curl https://purge.jsdelivr.net/npm/@miso.ai/shopify-client@latest",
     "start": "concurrently 'rollup -w -c rollup.config.dev.js' 'nodemon node mock-server/app.js'"
   },
   "repository": {
@@ -55,6 +55,6 @@
     "rollup-plugin-terser": "^7.0.2"
   },
   "dependencies": {
-    "@miso.ai/client-sdk": "^1.1.0-beta.2"
+    "@miso.ai/client-sdk": "^1.1.0"
   }
 }
