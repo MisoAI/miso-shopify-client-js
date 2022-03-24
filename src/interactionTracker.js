@@ -1,5 +1,4 @@
 import logger from './logger'
-import { getValFromQuery, getSlugFromPath } from './utils'
 
 let window
 export const API_ENDPOINT = 'https://api.askmiso.com/v1/'

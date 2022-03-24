@@ -42,7 +42,11 @@ export default class PageInfoObserver {
     }
     const oldInfo = this._info;
     const newInfo = this._info = deepFreeze({ url, ...parseUrl(url) });
-    this._events.emit('change', newInfo, oldInfo);
+    const data = { newInfo };
+    if (this._info) {
+      data.oldInfo = oldInfo;
+    }
+    this._events.emit('change', data);
   }
 
 }

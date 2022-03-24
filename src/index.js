@@ -1,10 +1,20 @@
 import CartObserver from './event/cart';
 import PageInfoObserver from './event/page';
-import Tracker from './interactionTracker'
 import { product as fetchProductInfo } from './event/api';
-import { genUuid, getConfigFromScript } from './utils'
 
-const ANONYMOUS_SESSION_KEY = 'misoAnonymousKey'
+import { genUuid, getConfigFromScript } from './utils'
+import Tracker from './interactionTracker'
+
+(() => {
+  // migrate to new session key
+  const LEGACY_ANONYMOUS_SESSION_KEY = 'misoAnonymousKey';
+  const ANONYMOUS_SESSION_KEY = 'miso-anonymous-id';
+  const anonymousId = window.sessionStorage.getItem(LEGACY_ANONYMOUS_SESSION_KEY);
+  anonymousId && window.sessionStorage.setItem(ANONYMOUS_SESSION_KEY, anonymousId);
+})();
+
+// TODO: plugin to override anonymousIdManager
+// TODO: customer
 
 function getUserId () {
   const ret = {}
@@ -69,7 +79,7 @@ function handleCartEvent(tracker, data) {
   }
 }
 
-async function handlePageInfoChange(tracker, info) {
+async function handlePageInfoChange(tracker, { newInfo: info }) {
   if (!info) {
     return;
   }
@@ -137,7 +147,7 @@ async function toProductDetailPageViewPayload(info) {
   const tracker = new Tracker(window, ctx);
 
   const cartObserver = new CartObserver();
-  cartObserver.any((_, data) => handleCartEvent(tracker, data));
+  cartObserver.any((data) => handleCartEvent(tracker, data));
   cartObserver.start();
 
   const pageInfoObserver = new PageInfoObserver();

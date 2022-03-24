@@ -20,7 +20,7 @@ function getEventEmitter() {
     const data = { resource, init, path, method };
     events.emit('request', data);
     const response = await _fetch.apply(this, arguments);
-    events.emit('response', Object.assign({ response }, data));
+    events.emit('response', { response, ...data });
     return response;
   };
   return events;

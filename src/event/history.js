@@ -9,23 +9,23 @@ function getEventEmitter({ error }) {
   const _pushState = history.pushState;
   history.pushState = function(state, _, url) {
     const result = _pushState.apply(this, arguments);
-    events.emit('pushstate', state, url);
+    events.emit('pushstate', { state, url });
     return result;
   };
 
   const _replaceState = history.replaceState;
   history.replaceState = function(state, _, url) {
     const result = _replaceState.apply(this, arguments);
-    events.emit('replacestate', state, url);
+    events.emit('replacestate', { state, url });
     return result;
   };
 
   window.addEventListener('popstate', ({ state }) => {
-    events.emit('popstate', state);
+    events.emit('popstate', { state });
   }, false);
 
   window.addEventListener('hashchange', () => {
-    events.emit('hashchange');
+    events.emit('hashchange', {});
   }, false);
 
   return events;

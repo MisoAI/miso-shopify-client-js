@@ -17,38 +17,37 @@ export default class EventEmitter {
     this._unnamed = [];
   }
 
-  emit(name) {
+  emit(name, data) {
+    const event = { name, data };
     const callbacks = this._named[name];
-    const restArgs = Array.prototype.slice.call(arguments, 1);
     if (callbacks) {
       for (const callback of callbacks) {
-        callback(restArgs);
+        callback(event);
       }
     }
-    const allArgs = Array.prototype.slice.call(arguments);
     for (const callback of this._unnamed) {
-      callback(allArgs);
+      callback(event);
     }
   }
 
   on(name, callback) {
     this._checkName(name);
     this._checkCallback(callback);
-    return this._on(name, this._wrapCallback(name, callback));
+    return this._on(name, this._wrapCallback(callback));
   }
 
   any(callback) {
     this._checkCallback(callback);
-    return this._on(undefined, this._wrapCallback(undefined, callback));
+    return this._on(undefined, this._wrapCallback(callback));
   }
 
   once(name, callback) {
     this._checkName(name);
     this._checkCallback(callback);
-    const wrappedCallback = this._wrapCallback(name, callback);
-    const off = this._on(name, (args) => {
+    const wrappedCallback = this._wrapCallback(callback);
+    const off = this._on(name, (data) => {
       off();
-      wrappedCallback(args);
+      wrappedCallback(data);
     });
     return off;
   }
@@ -66,11 +65,11 @@ export default class EventEmitter {
     }
   }
 
-  _wrapCallback(name, callback) {
+  _wrapCallback(callback) {
     const self = this;
-    return (args) => {
+    return ({ name, data }) => {
       try {
-        callback.apply(undefined, args);
+        callback(data, { name });
       } catch(e) {
         const msg = name ? `Error in event callback of ${name}.` : `Error in unnamed event callback.`
         self._error(new Error(msg, { cause: e }));
