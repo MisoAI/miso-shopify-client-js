@@ -8,7 +8,7 @@ export default {
   input: 'src/index.js',
   output: {
     file: 'dist/miso-shopify.js',
-    format: 'cjs',
+    format: 'umd',
     indent: true
   },
   watch: true,

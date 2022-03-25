@@ -11,7 +11,7 @@ export default [
     input: 'src/index.js',
     output: {
       file: 'dist/miso-shopify.min.js',
-      format: 'cjs',
+      format: 'umd',
       indent: false
     },
     plugins: [
