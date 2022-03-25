@@ -122,7 +122,9 @@ export default class CartObserver {
 
   _autoget() {
     if (this._options.autoget) {
-      this.fetchCartInfo();
+      try {
+        this.fetchCartInfo();
+      } catch(e) {} // TODO: track later
     }
   }
 
