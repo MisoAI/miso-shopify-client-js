@@ -124,7 +124,10 @@ export default class CartObserver {
     if (this._options.autoget) {
       try {
         this.fetchCartInfo();
-      } catch(e) {} // TODO: track later
+      } catch(e) {
+        // TODO: track later
+        console.warn(`Fetch cart info not successful: ${e && e.message}`);
+      }
     }
   }
 
