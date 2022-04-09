@@ -1,6 +1,7 @@
 import MisoClient from '@miso.ai/client-sdk';
 import { getAnonymousUserToken, getCustomerId } from './event/user';
 import InteractionObserver from './interaction';
+//import ShopifySectionElement from './element/section';
 
 import { getConfigFromScript } from './utils';
 
@@ -39,6 +40,9 @@ function onError(e) {
     // TODO
     throw new Error('Expected api_key in script URL parameters');
   }
+
+  MisoClient.plugins.use('std:ui');
+  //MisoClient.ui.elements.register(ShopifySectionElement);
 
   const client = new MisoClient(apiKey);
   if (userId) {
