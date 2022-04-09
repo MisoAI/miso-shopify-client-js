@@ -1,6 +1,7 @@
 import MisoClient from '@miso.ai/client-sdk';
 import { getAnonymousUserToken, getCustomerId } from './event/user';
 import InteractionObserver from './interaction';
+import Shopify from './shopify';
 //import ShopifySectionElement from './element/section';
 
 import { getConfigFromScript } from './utils';
@@ -48,6 +49,7 @@ function onError(e) {
   if (userId) {
     client.context.user_id = `${userId}`;
   }
+  MisoClient.shopify = new Shopify();
   
   const interactionObserver = new InteractionObserver({ onError });
   interactionObserver.any((data) => client.api.interactions.upload(data));
