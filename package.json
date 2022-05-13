@@ -55,7 +55,7 @@
     "rollup-plugin-terser": "^7.0.2"
   },
   "dependencies": {
-    "@miso.ai/client-sdk": "^1.3.0-beta.5",
-    "@miso.ai/client-sdk-ui": "^1.3.0-beta.5"
+    "@miso.ai/client-sdk": "^1.3.0",
+    "@miso.ai/client-sdk-ui": "^1.3.0"
   }
 }
