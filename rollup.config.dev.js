@@ -22,7 +22,7 @@ export default {
     }),
     nodeResolve(),
     serve({
-      port: 10301,
+      port: 11101,
       //https: true
     }),
     livereload({
