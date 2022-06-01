@@ -28,14 +28,11 @@ function getAnonymousIdFromLegacySessionKey() {
   }
 })();
 
-// user ID
-const userId = getCustomerId();
-
-function onError(e) {
-  // TODO: send to MisoClient's error() method
-}
-
 (function init() {
+  if (MisoClient.shopify) {
+    return; // idempotency
+  }
+
   const apiKey = getConfigFromScript('api_key');
   if (!apiKey) {
     // TODO
@@ -43,14 +40,21 @@ function onError(e) {
   }
 
   MisoClient.plugins.use(UiPlugin);
-  //MisoClient.ui.elements.register(ShopifySectionElement);
+
+  MisoClient.shopify = new Shopify();
+
+  // user ID
+  const userId = getCustomerId();
 
   const client = new MisoClient(apiKey);
   if (userId) {
     client.context.user_id = `${userId}`;
   }
-  MisoClient.shopify = new Shopify();
-  
+
+  function onError(e) {
+    // TODO: send to MisoClient's error() method
+  }
+
   const interactionObserver = new InteractionObserver({ onError });
   interactionObserver.any((data) => client.api.interactions.upload(data));
   interactionObserver.start();
